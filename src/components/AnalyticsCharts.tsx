@@ -13,6 +13,7 @@ import {
   Cell,
 } from 'recharts';
 import { ProcessedCityWeather, TempUnit } from '../types';
+import { CityTrendChart } from './CityTrendChart';
 
 interface AnalyticsChartsProps {
   cities: ProcessedCityWeather[];
@@ -68,6 +69,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ cities, tempUn
 
   return (
     <div className="space-y-6 mb-8">
+      {/* BONUS REQUIREMENT: Interactive City Temperature & Comfort Trend Curve */}
+      <CityTrendChart cities={cities} tempUnit={tempUnit} standalone={true} />
+
       {/* CHART 1: Comfort Index Ranking Leaderboard */}
       <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">

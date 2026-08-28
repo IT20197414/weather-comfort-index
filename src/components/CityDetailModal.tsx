@@ -17,6 +17,7 @@ import {
 import { ProcessedCityWeather, TempUnit } from '../types';
 import { CountryFlag } from './CountryFlag';
 import { getCountryName } from '../utils/country';
+import { CityTrendChart } from './CityTrendChart';
 
 interface CityDetailModalProps {
   city: ProcessedCityWeather | null;
@@ -31,10 +32,15 @@ export const CityDetailModal: React.FC<CityDetailModalProps> = ({ city, tempUnit
     return tempUnit === 'C' ? `${celsius}°C` : `${fahrenheit}°F`;
   };
 
-  const formatTime = (unixSeconds: number) => {
+  const formatTime = (unixSeconds: number, timezoneOffsetSec: number = 0) => {
     if (!unixSeconds) return '--:--';
-    const date = new Date(unixSeconds * 1000);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // Shift timestamp by city timezone offset, then format using UTC so browser's local timezone does not distort the city's actual time
+    const d = new Date((unixSeconds + timezoneOffsetSec) * 1000);
+    const hours = d.getUTCHours();
+    const minutes = d.getUTCMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+    return `${displayHours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
   };
 
   const b = city.comfortBreakdown;
@@ -165,6 +171,9 @@ export const CityDetailModal: React.FC<CityDetailModalProps> = ({ city, tempUnit
             </div>
           </div>
 
+          {/* Hourly Temperature & Comfort Trend Curve (Bonus Requirement) */}
+          <CityTrendChart cities={[city]} tempUnit={tempUnit} initialCityId={city.id} standalone={false} />
+
           {/* Sub-scores Breakdown Grid */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">
@@ -214,16 +223,16 @@ export const CityDetailModal: React.FC<CityDetailModalProps> = ({ city, tempUnit
             <div className="flex items-center space-x-2 p-2 rounded-lg bg-stone-50 dark:bg-stone-800">
               <Sunrise className="w-4 h-4 text-amber-500" />
               <div>
-                <span className="text-[10px] text-stone-400 block">Sunrise</span>
-                <span className="font-mono font-medium">{formatTime(city.sunrise)}</span>
+                <span className="text-[10px] text-stone-400 block">Sunrise (Local)</span>
+                <span className="font-mono font-medium">{formatTime(city.sunrise, city.timezone)}</span>
               </div>
             </div>
 
             <div className="flex items-center space-x-2 p-2 rounded-lg bg-stone-50 dark:bg-stone-800">
               <Sunset className="w-4 h-4 text-orange-500" />
               <div>
-                <span className="text-[10px] text-stone-400 block">Sunset</span>
-                <span className="font-mono font-medium">{formatTime(city.sunset)}</span>
+                <span className="text-[10px] text-stone-400 block">Sunset (Local)</span>
+                <span className="font-mono font-medium">{formatTime(city.sunset, city.timezone)}</span>
               </div>
             </div>
 

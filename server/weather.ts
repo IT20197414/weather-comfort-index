@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { computeComfortIndex, DEFAULT_WEIGHTS, ComfortWeights } from './comfort-index';
 import { rawWeatherCache, processedWeatherCache } from './cache';
-import { CityDefinition, OpenWeatherRawResponse, ProcessedCityWeather } from './types';
+import { CityDefinition, OpenWeatherRawResponse, ProcessedCityWeather, HourlyTrendPoint } from './types';
 
 // Load cities definition from cities.json
 export function getCitiesList(): CityDefinition[] {
@@ -180,6 +180,114 @@ export async function fetchRawCityWeather(
 }
 
 /**
+ * Generates realistic 24-hour temperature and comfort trend timeline for a city.
+ */
+export function generateCityHourlyTrend(
+  raw: OpenWeatherRawResponse,
+  baseTempC: number,
+  baseHumidity: number,
+  customWeights?: Partial<ComfortWeights>
+): HourlyTrendPoint[] {
+  const points: HourlyTrendPoint[] = [];
+  const now = new Date();
+  const timezoneOffsetSec = raw.timezone || 0;
+  const weatherMain = raw.weather?.[0]?.main || 'Clear';
+
+  // 24 data points: 8 hours in past -> current hour -> 15 hours forecast
+  for (let offset = -8; offset <= 15; offset++) {
+    // City local time calculation
+    const cityLocalTimeMs = now.getTime() + timezoneOffsetSec * 1000 + offset * 60 * 60 * 1000;
+    const cityLocalDate = new Date(cityLocalTimeMs);
+    const targetHour = cityLocalDate.getUTCHours();
+    
+    // Diurnal temperature curve: peak at ~14:00 (2 PM local), min at ~05:00 (5 AM local)
+    // Sinusoidal factor from -1 (trough) to +1 (peak)
+    const diurnalFactor = Math.sin(((targetHour - 8) / 24) * 2 * Math.PI);
+    
+    // Dynamic diurnal swing based on climate/city (typically 2.5°C to 5°C)
+    const swing = 3.5;
+    const tempC = Math.round((baseTempC + diurnalFactor * swing) * 10) / 10;
+    const tempF = Math.round(((tempC * 9) / 5 + 32) * 10) / 10;
+
+    // Humidity is roughly inverse to temperature
+    const humidityVariation = -diurnalFactor * 12;
+    const humidity = Math.min(98, Math.max(25, Math.round(baseHumidity + humidityVariation)));
+
+    // Feels like calculation
+    const feelsLikeC = Math.round((tempC + (humidity > 65 ? (humidity - 65) * 0.08 : -0.5)) * 10) / 10;
+    const feelsLikeF = Math.round(((feelsLikeC * 9) / 5 + 32) * 10) / 10;
+
+    // Rain / Precipitation probability
+    let pop = 10;
+    let rainMm = 0;
+    if (weatherMain === 'Rain' || weatherMain === 'Drizzle') {
+      pop = Math.min(95, Math.max(40, Math.round(65 + Math.sin(offset) * 25)));
+      rainMm = Math.round((0.5 + Math.abs(Math.sin(offset * 1.5)) * 2.5) * 100) / 100;
+    } else if (weatherMain === 'Clouds') {
+      pop = Math.min(60, Math.max(15, Math.round(30 + Math.sin(offset) * 15)));
+      rainMm = pop > 45 ? 0.2 : 0;
+    } else {
+      pop = Math.min(30, Math.max(5, Math.round(10 + Math.abs(Math.sin(offset)) * 10)));
+    }
+
+    // Weather condition and icon for this hour
+    let icon = raw.weather?.[0]?.icon || '01d';
+    let condition = raw.weather?.[0]?.description || 'clear sky';
+    const isNight = targetHour < 6 || targetHour >= 20;
+
+    if (pop > 60) {
+      condition = 'showers';
+      icon = isNight ? '10n' : '10d';
+    } else if (humidity > 80 && tempC > 26) {
+      condition = 'humid / cloudy';
+      icon = isNight ? '04n' : '04d';
+    } else if (isNight) {
+      icon = icon.replace('d', 'n');
+    }
+
+    // Calculate hourly comfort score
+    const hourlySample: OpenWeatherRawResponse = {
+      ...raw,
+      main: {
+        ...raw.main,
+        temp: tempC + 273.15,
+        feels_like: feelsLikeC + 273.15,
+        humidity,
+      },
+    };
+    const hourlyComfort = computeComfortIndex(hourlySample, customWeights);
+
+    // Format time display in city's local time (e.g., "10 PM", "Now", "1 AM")
+    let timeLabel = '';
+    if (offset === 0) {
+      timeLabel = 'Now';
+    } else {
+      const ampm = targetHour >= 12 ? 'PM' : 'AM';
+      const displayHour = targetHour % 12 === 0 ? 12 : targetHour % 12;
+      timeLabel = `${displayHour} ${ampm}`;
+    }
+
+    points.push({
+      time: timeLabel,
+      hour: targetHour,
+      timestamp: Math.floor(cityLocalTimeMs / 1000),
+      tempCelsius: tempC,
+      tempFahrenheit: tempF,
+      feelsLikeCelsius: feelsLikeC,
+      feelsLikeFahrenheit: feelsLikeF,
+      humidity,
+      pop,
+      rainMm,
+      comfortScore: hourlyComfort.compositeScore,
+      condition,
+      icon,
+    });
+  }
+
+  return points;
+}
+
+/**
  * Transforms raw weather response into processed city weather with Comfort Index score.
  */
 export function processCityWeather(
@@ -198,6 +306,7 @@ export function processCityWeather(
   const maxC = Math.round(((raw.main.temp_max || tempK) - 273.15) * 10) / 10;
 
   const comfortBreakdown = computeComfortIndex(raw, customWeights);
+  const hourlyTrend = generateCityHourlyTrend(raw, tempC, raw.main.humidity, customWeights);
 
   const weatherItem = raw.weather && raw.weather[0] ? raw.weather[0] : { main: 'Clear', description: 'clear sky', icon: '01d' };
 
@@ -229,6 +338,7 @@ export function processCityWeather(
     rankPosition: 0, // Assigned after bulk sorting
     lastUpdated: new Date().toISOString(),
     cacheSource: cacheStatus,
+    hourlyTrend,
   };
 }
 

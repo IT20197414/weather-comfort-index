@@ -73,6 +73,22 @@ export interface ComfortScoreBreakdown {
   };
 }
 
+export interface HourlyTrendPoint {
+  time: string;
+  hour: number;
+  timestamp: number;
+  tempCelsius: number;
+  tempFahrenheit: number;
+  feelsLikeCelsius: number;
+  feelsLikeFahrenheit: number;
+  humidity: number;
+  pop: number; // Probability of precipitation %
+  rainMm: number;
+  comfortScore: number;
+  condition: string;
+  icon: string;
+}
+
 export interface ProcessedCityWeather {
   id: number;
   name: string;
@@ -101,6 +117,7 @@ export interface ProcessedCityWeather {
   rankPosition: number; // 1 = Most comfortable
   lastUpdated: string;
   cacheSource?: 'HIT' | 'MISS';
+  hourlyTrend?: HourlyTrendPoint[];
 }
 
 export interface CacheEntry<T> {
