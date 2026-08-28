@@ -1,0 +1,6 @@
+{
+  "name": "Fidenz Weather Analytics",
+  "description": "Weather analytics platform featuring custom Comfort Index algorithm, server-side caching, secure auth with MFA, and interactive city ranking insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
