@@ -194,40 +194,62 @@ export function generateCityHourlyTrend(
   const weatherMain = raw.weather?.[0]?.main || 'Clear';
 
   // 24 data points: 8 hours in past -> current hour -> 15 hours forecast
+  // Compute current hour's diurnal phase factor for anchoring
+  const currentLocalTimeMs = now.getTime() + timezoneOffsetSec * 1000;
+  const currentLocalHour = new Date(currentLocalTimeMs).getUTCHours();
+  const currentDiurnalFactor = Math.sin(((currentLocalHour - 8) / 24) * 2 * Math.PI);
+
+  const rawFeelsLikeC = Math.round(((raw.main.feels_like || raw.main.temp) - 273.15) * 10) / 10;
+  const rawFeelsLikeF = Math.round(((rawFeelsLikeC * 9) / 5 + 32) * 10) / 10;
+  const baseTempF = Math.round(((baseTempC * 9) / 5 + 32) * 10) / 10;
+
   for (let offset = -8; offset <= 15; offset++) {
     // City local time calculation
     const cityLocalTimeMs = now.getTime() + timezoneOffsetSec * 1000 + offset * 60 * 60 * 1000;
     const cityLocalDate = new Date(cityLocalTimeMs);
     const targetHour = cityLocalDate.getUTCHours();
     
-    // Diurnal temperature curve: peak at ~14:00 (2 PM local), min at ~05:00 (5 AM local)
-    // Sinusoidal factor from -1 (trough) to +1 (peak)
-    const diurnalFactor = Math.sin(((targetHour - 8) / 24) * 2 * Math.PI);
-    
-    // Dynamic diurnal swing based on climate/city (typically 2.5°C to 5°C)
-    const swing = 3.5;
-    const tempC = Math.round((baseTempC + diurnalFactor * swing) * 10) / 10;
-    const tempF = Math.round(((tempC * 9) / 5 + 32) * 10) / 10;
+    let tempC: number;
+    let tempF: number;
+    let feelsLikeC: number;
+    let feelsLikeF: number;
+    let humidity: number;
 
-    // Humidity is roughly inverse to temperature
-    const humidityVariation = -diurnalFactor * 12;
-    const humidity = Math.min(98, Math.max(25, Math.round(baseHumidity + humidityVariation)));
+    if (offset === 0) {
+      // Strictly anchor the "Now" data point to the exact real-time live measurements
+      tempC = baseTempC;
+      tempF = baseTempF;
+      feelsLikeC = rawFeelsLikeC;
+      feelsLikeF = rawFeelsLikeF;
+      humidity = baseHumidity;
+    } else {
+      // Diurnal temperature curve relative to the current live temperature
+      const diurnalFactor = Math.sin(((targetHour - 8) / 24) * 2 * Math.PI);
+      const relativeDiurnalDelta = (diurnalFactor - currentDiurnalFactor) * 3.5;
 
-    // Feels like calculation
-    const feelsLikeC = Math.round((tempC + (humidity > 65 ? (humidity - 65) * 0.08 : -0.5)) * 10) / 10;
-    const feelsLikeF = Math.round(((feelsLikeC * 9) / 5 + 32) * 10) / 10;
+      tempC = Math.round((baseTempC + relativeDiurnalDelta) * 10) / 10;
+      tempF = Math.round(((tempC * 9) / 5 + 32) * 10) / 10;
+
+      // Humidity is roughly inverse to temperature
+      const humidityVariation = -(diurnalFactor - currentDiurnalFactor) * 12;
+      humidity = Math.min(98, Math.max(25, Math.round(baseHumidity + humidityVariation)));
+
+      // Feels like calculation
+      feelsLikeC = Math.round((tempC + (humidity > 65 ? (humidity - 65) * 0.08 : -0.5)) * 10) / 10;
+      feelsLikeF = Math.round(((feelsLikeC * 9) / 5 + 32) * 10) / 10;
+    }
 
     // Rain / Precipitation probability
     let pop = 10;
     let rainMm = 0;
     if (weatherMain === 'Rain' || weatherMain === 'Drizzle') {
-      pop = Math.min(95, Math.max(40, Math.round(65 + Math.sin(offset) * 25)));
+      pop = offset === 0 ? 80 : Math.min(95, Math.max(40, Math.round(65 + Math.sin(offset) * 25)));
       rainMm = Math.round((0.5 + Math.abs(Math.sin(offset * 1.5)) * 2.5) * 100) / 100;
     } else if (weatherMain === 'Clouds') {
-      pop = Math.min(60, Math.max(15, Math.round(30 + Math.sin(offset) * 15)));
+      pop = offset === 0 ? 30 : Math.min(60, Math.max(15, Math.round(30 + Math.sin(offset) * 15)));
       rainMm = pop > 45 ? 0.2 : 0;
     } else {
-      pop = Math.min(30, Math.max(5, Math.round(10 + Math.abs(Math.sin(offset)) * 10)));
+      pop = offset === 0 ? 10 : Math.min(30, Math.max(5, Math.round(10 + Math.abs(Math.sin(offset)) * 10)));
     }
 
     // Weather condition and icon for this hour
