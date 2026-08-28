@@ -8,6 +8,7 @@ import { DocumentationModal } from './components/DocumentationModal';
 import { CacheTelemetryModal } from './components/CacheTelemetryModal';
 import { FormulaPlaygroundModal } from './components/FormulaPlaygroundModal';
 import { UnitTestModal } from './components/UnitTestModal';
+import { ApiKeyModal } from './components/ApiKeyModal';
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -22,6 +23,7 @@ const AppContent: React.FC = () => {
   const [showPlaygroundModal, setShowPlaygroundModal] = useState(false);
   const [showTestsModal, setShowTestsModal] = useState(false);
   const [showDocsModal, setShowDocsModal] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -49,6 +51,7 @@ const AppContent: React.FC = () => {
         onOpenPlayground={() => setShowPlaygroundModal(true)}
         onOpenTests={() => setShowTestsModal(true)}
         onOpenDocs={() => setShowDocsModal(true)}
+        onOpenApiKey={() => setShowApiKeyModal(true)}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
       />
@@ -87,6 +90,12 @@ const AppContent: React.FC = () => {
             />
           </>
         )}
+
+        {/* Global API Key Configuration Modal */}
+        <ApiKeyModal
+          isOpen={showApiKeyModal}
+          onClose={() => setShowApiKeyModal(false)}
+        />
       </div>
 
       {/* Bottom Footer */}

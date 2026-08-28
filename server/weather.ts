@@ -142,18 +142,21 @@ export async function fetchRawCityWeather(
   city: CityDefinition,
   apiKey?: string
 ): Promise<{ raw: OpenWeatherRawResponse; cacheStatus: 'HIT' | 'MISS' }> {
-  const cacheKey = `weather_raw_${city.id}`;
+  const effectiveApiKey =
+    apiKey?.trim() ||
+    process.env.OPENWEATHER_API_KEY?.trim() ||
+    '5c00ada02a2ccf3c195f4370cc7f24c2';
+
+  const cacheKey = `weather_raw_${city.id}_${effectiveApiKey ? effectiveApiKey.slice(-6) : 'fallback'}`;
   const cached = rawWeatherCache.get(cacheKey);
 
   if (cached.status === 'HIT' && cached.data) {
     return { raw: cached.data, cacheStatus: 'HIT' };
   }
 
-  const effectiveApiKey = apiKey || process.env.OPENWEATHER_API_KEY;
-
-  if (effectiveApiKey && effectiveApiKey.trim().length > 10) {
+  if (effectiveApiKey && effectiveApiKey.length > 10) {
     try {
-      const url = `https://api.openweathermap.org/data/2.5/weather?id=${city.id}&appid=${effectiveApiKey.trim()}`;
+      const url = `https://api.openweathermap.org/data/2.5/weather?id=${city.id}&appid=${effectiveApiKey}`;
       const response = await fetch(url);
 
       if (response.ok) {
@@ -161,7 +164,9 @@ export async function fetchRawCityWeather(
         rawWeatherCache.set(cacheKey, rawData, 300 * 1000); // 5 minutes TTL
         return { raw: rawData, cacheStatus: 'MISS' };
       } else {
-        console.warn(`OpenWeatherMap API error for city ${city.name} (${city.id}): ${response.status} ${response.statusText}`);
+        console.warn(
+          `OpenWeatherMap API error for city ${city.name} (${city.id}): ${response.status} ${response.statusText}`
+        );
       }
     } catch (err) {
       console.error(`Network fetch failed for city ${city.name}:`, err);
@@ -241,7 +246,12 @@ export async function getAllCitiesWeather(
   totalCities: number;
 }> {
   const startTime = Date.now();
-  const processedCacheKey = `all_cities_processed_${JSON.stringify(customWeights || {})}`;
+  const effectiveApiKey =
+    apiKey?.trim() ||
+    process.env.OPENWEATHER_API_KEY?.trim() ||
+    '5c00ada02a2ccf3c195f4370cc7f24c2';
+
+  const processedCacheKey = `all_cities_processed_${effectiveApiKey.slice(-6)}_${JSON.stringify(customWeights || {})}`;
 
   if (!forceRefresh) {
     const cached = processedWeatherCache.get(processedCacheKey);

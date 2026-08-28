@@ -1,6 +1,8 @@
 import React from 'react';
 import { Eye, ArrowRight, Sun, Cloud, Trophy } from 'lucide-react';
 import { ProcessedCityWeather, TempUnit } from '../types';
+import { CountryFlag } from './CountryFlag';
+import { getCountryName } from '../utils/country';
 
 interface CityTableViewProps {
   cities: ProcessedCityWeather[];
@@ -65,10 +67,11 @@ export const CityTableView: React.FC<CityTableViewProps> = ({ cities, tempUnit, 
                 </td>
 
                 <td className="px-4 py-3 font-semibold text-stone-900 dark:text-stone-100">
-                  <div className="flex items-center space-x-1.5">
+                  <div className="flex items-center space-x-2">
+                    <CountryFlag countryCode={city.country} size="sm" />
                     <span>{city.name}</span>
-                    <span className="text-[11px] px-1.5 py-0.2 rounded bg-stone-100 dark:bg-stone-800 text-stone-500 font-mono">
-                      {city.country}
+                    <span className="text-[11px] text-stone-400 font-medium hidden sm:inline">
+                      {getCountryName(city.country)}
                     </span>
                   </div>
                 </td>

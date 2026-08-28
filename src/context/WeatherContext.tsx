@@ -44,7 +44,9 @@ export const WeatherProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [comfortFilter, setComfortFilter] = useState<ComfortFilter>('ALL');
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'analytics'>('grid');
   const [cacheTelemetry, setCacheTelemetry] = useState<CacheTelemetry | null>(null);
-  const [customApiKey, setCustomApiKey] = useState<string>('');
+  const [customApiKey, setCustomApiKey] = useState<string>(() => {
+    return localStorage.getItem('fidenz_weather_custom_api_key') || '';
+  });
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const [cacheStatusBanner, setCacheStatusBanner] = useState<{ status: string; duration: number } | null>(null);
 

@@ -11,6 +11,8 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useWeather } from '../context/WeatherContext';
+import { CountryFlag } from './CountryFlag';
+import { getCountryName } from '../utils/country';
 
 interface FormulaPlaygroundModalProps {
   isOpen: boolean;
@@ -235,8 +237,9 @@ export const FormulaPlaygroundModal: React.FC<FormulaPlaygroundModalProps> = ({ 
                     return (
                       <tr key={city.id} className="hover:bg-stone-50 dark:hover:bg-stone-800/50">
                         <td className="px-3 py-2 text-center font-bold font-mono">#{newRank}</td>
-                        <td className="px-3 py-2 font-semibold text-stone-900 dark:text-stone-100">
-                          {city.name} ({city.country})
+                        <td className="px-3 py-2 font-semibold text-stone-900 dark:text-stone-100 flex items-center space-x-1.5">
+                          <CountryFlag countryCode={city.country} size="xs" />
+                          <span>{city.name}</span>
                         </td>
                         <td className="px-3 py-2 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
                           {city.newScore}

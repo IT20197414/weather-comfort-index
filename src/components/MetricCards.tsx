@@ -10,6 +10,8 @@ import {
   Compass,
 } from 'lucide-react';
 import { useWeather } from '../context/WeatherContext';
+import { CountryFlag } from './CountryFlag';
+import { getCountryName } from '../utils/country';
 
 export const MetricCards: React.FC = () => {
   const { cities, tempUnit, cacheTelemetry, cacheStatusBanner } = useWeather();
@@ -43,8 +45,9 @@ export const MetricCards: React.FC = () => {
         </div>
         <div className="flex items-baseline justify-between mt-1">
           <div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100">
-              {topCity.name} <span className="text-xs font-medium text-stone-500">({topCity.country})</span>
+            <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
+              <CountryFlag countryCode={topCity.country} size="sm" />
+              <span>{topCity.name}</span>
             </h3>
             <p className="text-xs text-stone-500 dark:text-stone-400 capitalize">
               {topCity.weatherDescription} • {formatTemp(topCity.temperatureCelsius, topCity.temperatureFahrenheit)}
@@ -101,8 +104,9 @@ export const MetricCards: React.FC = () => {
         </div>
         <div className="flex items-baseline justify-between mt-1">
           <div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100">
-              {lowestCity.name} <span className="text-xs font-medium text-stone-500">({lowestCity.country})</span>
+            <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
+              <CountryFlag countryCode={lowestCity.country} size="sm" />
+              <span>{lowestCity.name}</span>
             </h3>
             <p className="text-xs text-stone-500 dark:text-stone-400">
               Rank #{lowestCity.rankPosition} • {formatTemp(lowestCity.temperatureCelsius, lowestCity.temperatureFahrenheit)}

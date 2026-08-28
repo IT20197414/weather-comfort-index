@@ -15,6 +15,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { ProcessedCityWeather, TempUnit } from '../types';
+import { CountryFlag } from './CountryFlag';
+import { getCountryName } from '../utils/country';
 
 interface CityDetailModalProps {
   city: ProcessedCityWeather | null;
@@ -107,11 +109,12 @@ export const CityDetailModal: React.FC<CityDetailModalProps> = ({ city, tempUnit
               <span className="px-2 py-0.5 rounded-md bg-amber-400 text-amber-950 font-black text-xs">
                 Rank #{city.rankPosition}
               </span>
+              <CountryFlag countryCode={city.country} size="md" />
               <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">
                 {city.name}
               </h2>
-              <span className="text-xs px-2 py-0.5 rounded bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-mono">
-                {city.country}
+              <span className="text-xs px-2 py-0.5 rounded-md bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-medium">
+                {getCountryName(city.country)}
               </span>
             </div>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 capitalize flex items-center space-x-1.5">

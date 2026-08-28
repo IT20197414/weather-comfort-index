@@ -11,6 +11,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { ProcessedCityWeather, TempUnit } from '../types';
+import { CountryFlag } from './CountryFlag';
+import { getCountryName } from '../utils/country';
 
 interface CityCardProps {
   city: ProcessedCityWeather;
@@ -64,11 +66,14 @@ export const CityCard: React.FC<CityCardProps> = ({ city, tempUnit, onSelect }) 
               #{city.rankPosition}
             </span>
             <div>
-              <h3 className="font-bold text-base text-stone-900 dark:text-stone-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                {city.name}
-              </h3>
-              <span className="text-xs text-stone-400 font-semibold uppercase tracking-wider">
-                {city.country}
+              <div className="flex items-center space-x-1.5">
+                <CountryFlag countryCode={city.country} size="sm" />
+                <h3 className="font-bold text-base text-stone-900 dark:text-stone-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {city.name}
+                </h3>
+              </div>
+              <span className="text-xs text-stone-400 dark:text-stone-500 font-medium">
+                {getCountryName(city.country)}
               </span>
             </div>
           </div>
