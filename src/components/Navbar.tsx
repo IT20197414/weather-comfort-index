@@ -5,7 +5,6 @@ import {
   Server,
   Sliders,
   CheckCircle2,
-  BookOpen,
   LogOut,
   Moon,
   Sun,
@@ -19,7 +18,6 @@ interface NavbarProps {
   onOpenCache: () => void;
   onOpenPlayground: () => void;
   onOpenTests: () => void;
-  onOpenDocs: () => void;
   onOpenApiKey: () => void;
   darkMode: boolean;
   setDarkMode: (val: boolean) => void;
@@ -29,7 +27,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCache,
   onOpenPlayground,
   onOpenTests,
-  onOpenDocs,
   onOpenApiKey,
   darkMode,
   setDarkMode,
@@ -110,17 +107,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-violet-500 shrink-0" />
               <span className="hidden lg:inline">Unit Tests</span>
-            </button>
-
-            {/* Documentation / README Trigger */}
-            <button
-              id="btn-nav-docs"
-              onClick={onOpenDocs}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 transition-colors whitespace-nowrap shrink-0"
-              title="Assignment Briefing & README"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span className="hidden xl:inline">README</span>
             </button>
 
             {/* API Key Modal Trigger */}

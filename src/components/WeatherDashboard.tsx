@@ -9,7 +9,6 @@ import { CityDetailModal } from './CityDetailModal';
 import { CacheTelemetryModal } from './CacheTelemetryModal';
 import { FormulaPlaygroundModal } from './FormulaPlaygroundModal';
 import { UnitTestModal } from './UnitTestModal';
-import { DocumentationModal } from './DocumentationModal';
 import { CloudRain, RefreshCw, AlertCircle } from 'lucide-react';
 
 interface WeatherDashboardProps {
@@ -19,8 +18,6 @@ interface WeatherDashboardProps {
   setShowPlaygroundModal: (val: boolean) => void;
   showTestsModal: boolean;
   setShowTestsModal: (val: boolean) => void;
-  showDocsModal: boolean;
-  setShowDocsModal: (val: boolean) => void;
 }
 
 export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
@@ -30,8 +27,6 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
   setShowPlaygroundModal,
   showTestsModal,
   setShowTestsModal,
-  showDocsModal,
-  setShowDocsModal,
 }) => {
   const {
     filteredCities,
@@ -139,11 +134,6 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
       <UnitTestModal
         isOpen={showTestsModal}
         onClose={() => setShowTestsModal(false)}
-      />
-
-      <DocumentationModal
-        isOpen={showDocsModal}
-        onClose={() => setShowDocsModal(false)}
       />
     </main>
   );

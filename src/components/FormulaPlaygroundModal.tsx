@@ -4,7 +4,6 @@ import {
   Sliders,
   Sparkles,
   Code2,
-  Video,
   CheckCircle2,
   RefreshCw,
   Info,
@@ -83,10 +82,10 @@ export const FormulaPlaygroundModal: React.FC<FormulaPlaygroundModalProps> = ({ 
             </div>
             <div>
               <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
-                <span>Comfort Index Algorithm & Screen Recording Assistant</span>
+                <span>Comfort Index Algorithm Sandbox</span>
               </h2>
               <p className="text-xs text-stone-500 dark:text-stone-400">
-                Interactive parameter weighting sandbox & live extension simulator (Part 3 Guide)
+                Interactive parameter weighting sandbox & live sensitivity analysis
               </p>
             </div>
           </div>
@@ -101,17 +100,6 @@ export const FormulaPlaygroundModal: React.FC<FormulaPlaygroundModalProps> = ({ 
 
         {/* Modal Body */}
         <div className="p-5 sm:p-6 space-y-6">
-          {/* Part 3 Take-Home Screen Recording Helper Card */}
-          <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 text-xs space-y-2">
-            <div className="flex items-center space-x-2 font-bold text-amber-800 dark:text-amber-200">
-              <Video className="w-4 h-4 text-amber-600" />
-              <span>Assignment Part 3: 5-7 Min Screen Recording Task Guidelines</span>
-            </div>
-            <p className="text-stone-600 dark:text-stone-300 leading-relaxed">
-              In your 5-7 minute recording, you must live-demonstrate incorporating an additional parameter (e.g. Pressure or Visibility) and explain your reasoning. You can use the sliders below to demonstrate how weights shift the ranking in real-time.
-            </p>
-          </div>
-
           {/* Weight Sliders */}
           <div className="space-y-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">

@@ -4,7 +4,6 @@ import { WeatherProvider } from './context/WeatherContext';
 import { Navbar } from './components/Navbar';
 import { LoginView } from './components/LoginView';
 import { WeatherDashboard } from './components/WeatherDashboard';
-import { DocumentationModal } from './components/DocumentationModal';
 import { CacheTelemetryModal } from './components/CacheTelemetryModal';
 import { FormulaPlaygroundModal } from './components/FormulaPlaygroundModal';
 import { UnitTestModal } from './components/UnitTestModal';
@@ -22,7 +21,6 @@ const AppContent: React.FC = () => {
   const [showCacheModal, setShowCacheModal] = useState(false);
   const [showPlaygroundModal, setShowPlaygroundModal] = useState(false);
   const [showTestsModal, setShowTestsModal] = useState(false);
-  const [showDocsModal, setShowDocsModal] = useState(false);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
   useEffect(() => {
@@ -50,7 +48,6 @@ const AppContent: React.FC = () => {
         onOpenCache={() => setShowCacheModal(true)}
         onOpenPlayground={() => setShowPlaygroundModal(true)}
         onOpenTests={() => setShowTestsModal(true)}
-        onOpenDocs={() => setShowDocsModal(true)}
         onOpenApiKey={() => setShowApiKeyModal(true)}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
@@ -66,16 +63,10 @@ const AppContent: React.FC = () => {
             setShowPlaygroundModal={setShowPlaygroundModal}
             showTestsModal={showTestsModal}
             setShowTestsModal={setShowTestsModal}
-            showDocsModal={showDocsModal}
-            setShowDocsModal={setShowDocsModal}
           />
         ) : (
           <>
             <LoginView />
-            <DocumentationModal
-              isOpen={showDocsModal}
-              onClose={() => setShowDocsModal(false)}
-            />
             <UnitTestModal
               isOpen={showTestsModal}
               onClose={() => setShowTestsModal(false)}
